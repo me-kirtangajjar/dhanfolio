@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <title>Dhanfolio - Financial Dashboard</title>
+
+    <style>
+      .card-hover {
+        transition: transform 0.2s ease-in-out;
+      }
+      .card-hover:hover {
+        transform: translateY(-4px);
+      }
+      .glassmorphism {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .icon-circle {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+      .progress-container {
+        position: relative;
+        margin-top: 2rem;
+        padding-bottom: 1.5rem;
+      }
+      .percentage-indicator {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: 600;
+      }
+    </style>
+
+    <script>
+      function formatIndianCurrency(number) {
+        const num = parseFloat(number).toFixed(2);
+        const [wholePart, decimalPart] = num.split(".");
+        const lastThree = wholePart.substring(wholePart.length - 3);
+        const otherNumbers = wholePart.substring(0, wholePart.length - 3);
+        const formattedWholePart =
+          otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") +
+          (otherNumbers ? "," : "") +
+          lastThree;
+        return `₹ ${formattedWholePart}.${decimalPart}`;
+      }
+
+      function updateProgressBars() {
+        const categories = ["needs", "wants", "investments", "donations"];
+        categories.forEach((category) => {
+          const card = document.querySelector(`[data-category="${category}"]`);
+          if (!card) return;
+
+          const allocated = parseFloat(
+            card
+              .querySelector('[data-type="allocated"]')
+              .getAttribute("data-currency")
+          );
+          const used = parseFloat(
+            card
+              .querySelector('[data-type="used"]')
+              .getAttribute("data-currency")
+          );
+          const remaining = parseFloat(
+            card
+              .querySelector('[data-type="remaining"]')
+              .getAttribute("data-currency")
+          );
+          const percentageUsed = (used / allocated) * 100;
+          const displayPercentage = Math.min(percentageUsed, 100);
+
+          const progressBar = card.querySelector(".progress-bar");
+          const percentageText = card.querySelector(".percentage-indicator");
+          const remainingText = card.querySelector('[data-type="remaining"]');
+
+          progressBar.style.width = `${displayPercentage}%`;
+          percentageText.textContent = `${Math.round(percentageUsed)}%`;
+
+          if (remaining < 0) {
+            remainingText.classList.remove("text-green-600");
+            remainingText.classList.add("text-red-600");
+          } else {
+            remainingText.classList.remove("text-red-600");
+            remainingText.classList.add("text-green-600");
+          }
+
+          if (percentageUsed > 90) {
+            progressBar.classList.add("bg-red-500");
+            percentageText.classList.add("text-red-600");
+          }
+        });
+      }
+
+      function initializeDashboard() {
+        document.querySelectorAll("[data-currency]").forEach((element) => {
+          const value = element.getAttribute("data-currency");
+          element.textContent = formatIndianCurrency(value);
+        });
+        updateProgressBars();
+      }
+
+      document.addEventListener("DOMContentLoaded", initializeDashboard);
+    </script>
+  </head>
+  <body class="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
+    <%- include('./partials/navbar'); %>
+
+    <main class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-8">
+      <!-- Category Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Needs -->
+        <div
+          class="glassmorphism rounded-2xl p-6 card-hover"
+          data-category="needs"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="icon-circle bg-blue-100">
+                <i class="fas fa-home text-blue-600"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-800">Needs</h3>
+            </div>
+            <div class="bg-blue-100 px-3 py-1 rounded-full">
+              <span class="text-blue-800 text-sm font-semibold">25%</span>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Allocated</p>
+              <p
+                class="font-semibold text-gray-800"
+                data-type="allocated"
+                data-currency="<%= summary.needs.allocated %>"
+              ></p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Used</p>
+              <p
+                class="font-semibold text-gray-800"
+                data-type="used"
+                data-currency="<%= summary.needs.spent %>"
+              ></p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Remaining</p>
+              <p
+                class="font-semibold"
+                data-type="remaining"
+                data-currency="<%= summary.needs.remaining %>"
+              ></p>
+            </div>
+            <div class="progress-container">
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div
+                  class="progress-bar bg-blue-500 h-2 rounded-full transition-all duration-500"
+                ></div>
+              </div>
+              <span class="percentage-indicator text-sm">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wants -->
+        <div
+          class="glassmorphism rounded-2xl p-6 card-hover"
+          data-category="wants"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="icon-circle bg-purple-100">
+                <i class="fas fa-shopping-bag text-purple-600"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-800">Wants</h3>
+            </div>
+            <div class="bg-purple-100 px-3 py-1 rounded-full">
+              <span class="text-purple-800 text-sm font-semibold">25%</span>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Allocated</p>
+              <p
+                class="font-semibold text-gray-800"
+                data-type="allocated"
+                data-currency="<%= summary.wants.allocated %>"
+              ></p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Used</p>
+              <p
+                class="font-semibold text-gray-800"
+                data-type="used"
+                data-currency="<%= summary.wants.spent %>"
+              ></p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Remaining</p>
+              <p
+                class="font-semibold"
+                data-type="remaining"
+                data-currency="<%= summary.wants.remaining %>"
+              ></p>
+            </div>
+            <div class="progress-container">
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div
+                  class="progress-bar bg-purple-500 h-2 rounded-full transition-all duration-500"
+                ></div>
+              </div>
+              <span class="percentage-indicator text-sm">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Investments -->
+        <div
+          class="glassmorphism rounded-2xl p-6 card-hover"
+          data-category="investments"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="icon-circle bg-green-100">
+                <i class="fas fa-chart-line text-green-600"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-800">Investment</h3>
+            </div>
+            <div class="bg-green-100 px-3 py-1 rounded-full">
+              <span class="text-green-800 text-sm font-semibold">45%</span>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Allocated</p>
+              <p
+                class="font-semibold text-gray-800"
+                data-type="allocated"
+                data-currency="<%= summary.investments.allocated %>"
+              ></p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Used</p>
+              <p
+                class="font-semibold text-gray-800"
+                data-type="used"
+                data-currency="<%= summary.investments.spent %>"
+              ></p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Remaining</p>
+              <p
+                class="font-semibold"
+                data-type="remaining"
+                data-currency="<%= summary.investments.remaining %>"
+              ></p>
+            </div>
+            <div class="progress-container">
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div
+                  class="progress-bar bg-green-500 h-2 rounded-full transition-all duration-500"
+                ></div>
+              </div>
+              <span class="percentage-indicator text-sm">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Donations -->
+        <div
+          class="glassmorphism rounded-2xl p-6 card-hover"
+          data-category="donations"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="icon-circle bg-red-100">
+                <i class="fas fa-hand-holding-heart text-red-600"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-800">Donation</h3>
+            </div>
+            <div class="bg-red-100 px-3 py-1 rounded-full">
+              <span class="text-red-800 text-sm font-semibold">5%</span>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Allocated</p>
+              <p
+                class="font-semibold text-gray-800"
+                data-type="allocated"
+                data-currency="<%= summary.donations.allocated %>"
+              ></p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Used</p>
+              <p
+                class="font-semibold text-gray-800"
+                data-type="used"
+                data-currency="<%= summary.donations.spent %>"
+              ></p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Remaining</p>
+              <p
+                class="font-semibold"
+                data-type="remaining"
+                data-currency="<%= summary.donations.remaining %>"
+              ></p>
+            </div>
+            <div class="progress-container">
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div
+                  class="progress-bar bg-red-500 h-2 rounded-full transition-all duration-500"
+                ></div>
+              </div>
+              <span class="percentage-indicator text-sm">0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="glassmorphism rounded-xl p-4 card-hover">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-gray-500 text-sm font-medium">
+                Available Balance
+              </h2>
+              <p
+                class="text-xl font-bold text-gray-800 mt-1"
+                data-currency="<%= summary.income.remaining %>"
+              ></p>
+            </div>
+            <div class="icon-circle bg-green-100">
+              <i class="fas fa-wallet text-green-600 text-lg"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="glassmorphism rounded-xl p-4 card-hover">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-gray-500 text-sm font-medium">Total Income</h2>
+              <p
+                class="text-xl font-bold text-gray-800 mt-1"
+                data-currency="<%= summary.income.total %>"
+              ></p>
+            </div>
+            <div class="icon-circle bg-blue-100">
+              <i class="fas fa-chart-line text-blue-600 text-lg"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

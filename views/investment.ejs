@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <title>Investment - Dhanfolio</title>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Navigation -->
+    <%- include('./partials/navbar'); %>
+
+    <div class="max-w-6xl mx-auto px-4 py-6">
+      <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-plus-circle mr-2 text-blue-500"></i>
+          Add New Investment
+        </h2>
+        <form action="/investments" method="post" class="space-y-4">
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <div class="relative">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                >
+                  <i class="fas fa-calendar text-gray-400"></i>
+                </div>
+                <input
+                  id="date"
+                  name="date"
+                  type="date"
+                  required
+                  class="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div>
+              <div class="relative">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                >
+                  <span class="text-gray-400">₹</span>
+                </div>
+                <input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  required
+                  placeholder="Amount"
+                  class="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div class="flex space-x-2">
+              <div class="relative flex-grow">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                >
+                  <i class="fas fa-pen text-gray-400"></i>
+                </div>
+                <input
+                  id="description"
+                  name="description"
+                  type="text"
+                  required
+                  placeholder="Description"
+                  class="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <button
+                type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center justify-center"
+              >
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-4">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-history mr-2 text-blue-500"></i>
+          Investment History
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th
+                  class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Date
+                </th>
+                <th
+                  class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Amount
+                </th>
+                <th
+                  class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Description
+                </th>
+                <th
+                  class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <% investments.forEach(element => { %>
+              <tr class="hover:bg-gray-50 transition duration-150">
+                <td class="px-4 py-3 text-sm text-gray-600">
+                  <%= element.date.toLocaleDateString('en-GB', { day: '2-digit',
+                  month: '2-digit', year: 'numeric' }) %>
+                </td>
+                <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                  ₹ <%= element.amount.toLocaleString('en-IN') %>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-600">
+                  <%= element.description %>
+                </td>
+                <td
+                  class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium"
+                >
+                  <button class="text-blue-600 hover:text-blue-900 mr-3">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="text-red-600 hover:text-red-900">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
